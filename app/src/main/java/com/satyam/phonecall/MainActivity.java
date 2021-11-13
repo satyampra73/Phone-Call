@@ -2,6 +2,7 @@ package com.satyam.phonecall;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Intent;
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
 Button button;
 EditText editText;
 String  PhoneNo;
+static int requestCode=123;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,17 +29,33 @@ String  PhoneNo;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PhoneNo=editText.getText().toString();
-                Intent callIntent = new Intent(Intent.ACTION_DIAL);
-                callIntent.setData(Uri.parse("tel:"+PhoneNo));
+if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE)!=PackageManager.PERMISSION_GRANTED)
+{
+    Toast.makeText(MainActivity.this,"Please provide Phone Call permission to continue",Toast.LENGTH_SHORT).show();
+    ActivityCompat.requestPermissions(
+            MainActivity.this,
+            new String[]{
+                    Manifest.permission.CALL_PHONE,
+            },requestCode);
+}
+else {
+    PhoneNo = editText.getText().toString();
+    if(PhoneNo.isEmpty()){
+        Toast.makeText(MainActivity.this,"Please fill the Phone Number",Toast.LENGTH_SHORT).show();
+    }
+    else {
+        Intent callIntent = new Intent(Intent.ACTION_DIAL);
+        callIntent.setData(Uri.parse("tel:" + PhoneNo));
 
-                if (ActivityCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
 
-                    Toast.makeText(MainActivity.this,"something went wrong",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                startActivity(callIntent);
+            Toast.makeText(MainActivity.this, "something went wrong", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        startActivity(callIntent);
+    }
+}
             }
         });
     }
